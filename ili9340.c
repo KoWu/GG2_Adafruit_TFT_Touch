@@ -23,6 +23,9 @@
 static mraa_gpio_context dc, cs;
 static int fd, speed;
 
+/**
+ * Initialize needed pins.
+ */
 void ili9340_init(int spifd)
 {
 	dc = mraa_gpio_init(9);
@@ -37,6 +40,9 @@ void ili9340_init(int spifd)
 	ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
 }
 
+/**
+ * write a byte of spi data.
+ */
 void ili9340_write(uint8_t d)
 {
     struct spi_ioc_transfer msg;
@@ -49,6 +55,9 @@ void ili9340_write(uint8_t d)
     ioctl(fd, SPI_IOC_MESSAGE(1), &msg);
 }
 
+/**
+ * write a block of dword spi data.
+ */
 void ili9340_writeBlock(uint32_t* d, uint32_t size)
 {
 	struct spi_ioc_transfer msg;
@@ -60,6 +69,9 @@ void ili9340_writeBlock(uint32_t* d, uint32_t size)
 	ioctl(fd, SPI_IOC_MESSAGE(1), &msg);
 }
 
+/**
+ * put display into cmd mode, send cmd data.
+ */
 void ili9340_cmd(uint8_t c)
 {
 	mraa_gpio_write(dc, 0);
@@ -68,6 +80,9 @@ void ili9340_cmd(uint8_t c)
 	mraa_gpio_write(cs, 1);
 }
 
+/**
+ * put display into data mode, send data.
+ */
 void ili9340_data(uint8_t d)
 {
 	mraa_gpio_write(dc, 1);
@@ -76,6 +91,9 @@ void ili9340_data(uint8_t d)
 	mraa_gpio_write(cs, 1);
 }
 
+/**
+ * display initialization sequence.
+ */
 void ili9340_begin()
 {
 	ili9340_cmd(0xEF);
@@ -191,6 +209,9 @@ void ili9340_begin()
 	ili9340_cmd(ILI9341_DISPON);    //Display on
 }
 
+/**
+ * sets the viewport of the display
+ */
 void ili9340_setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
 
 	ili9340_cmd(ILI9341_CASET); // Column addr set
@@ -208,6 +229,9 @@ void ili9340_setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
 	ili9340_cmd(ILI9341_RAMWR); // write to RAM
 }
 
+/**
+ * draws a single pixel.
+ */
 void ili9340_drawPixel(int16_t x, int16_t y, uint16_t color)
 {
 	if((x < 0) ||(x >= ILI9341_TFTWIDTH) || (y < 0) || (y >= ILI9341_TFTHEIGHT))
@@ -224,6 +248,9 @@ void ili9340_drawPixel(int16_t x, int16_t y, uint16_t color)
 	mraa_gpio_write(cs, 1);
 }
 
+/**
+ * fills a rect with pixel data.
+ */
 void ili9340_fillRectData(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t* data)
 {
 	uint16_t n;
@@ -238,6 +265,9 @@ void ili9340_fillRectData(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t* 
 	mraa_gpio_write(cs, 1);
 }
 
+/**
+ * fills a rect with a specified color.
+ */
 void ili9340_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
 	int n;
@@ -257,10 +287,17 @@ void ili9340_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color
 	free(data);
 }
 
+/**
+ * fills the whole screen with a color.
+ */
 void ili9340_fillScreen(uint16_t color) {
 	ili9340_fillRect(0, 0, ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT, color);
 }
 
+/**
+ * converts a word array to a dword array by swapping upper and lower word.
+ * len in bytes.
+ */
 void ili9340_WordToDword(uint16_t* buf, uint32_t len)
 {
 	int n;
@@ -276,6 +313,9 @@ void ili9340_WordToDword(uint16_t* buf, uint32_t len)
 //0xf800 == blau 1111100000000000
 //0x03e0 == grün 0000011111100000
 //0x001f == rot  0000000000011111
+/**
+ * converts a 24bit rgb color into a 16bit.
+ */
 uint16_t ili9340_color(uint8_t r, uint8_t g, uint8_t b)
 {
 	return ((((uint16_t)(b >> 3)) << 11) | (((uint16_t)(g >> 2)) << 5) | ((uint16_t)(r >> 3)));

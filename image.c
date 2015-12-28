@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * loads an image from bitmap.
+ */
 int imageLoad(IMAGE *image, const char* file)
 {
 	int x,y;
